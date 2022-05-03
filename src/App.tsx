@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 
 const App = (): JSX.Element => {
-  const [Counter, setCounter] = useState(0)
-  setTimeout(() => setCounter(Counter + 1), 1000)
-  return <div>{Counter}</div>
+  let [Str, setStr] = useState('Loner')
+  setTimeout(() => setStr((): string => (Str += 'Loner')), 1000)
+  return <div>{Str}</div>
 }
 
 export default App
