@@ -1,21 +1,21 @@
-name: GitHub Actions Build and Deploy Demo
+name: GitHub Actions Demo
 on:
-  push:
-    branches:
-     - master
+  push:
+    branchs:
+      - master
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@master
-      - name: install
-        run: yarn
-      - name: build
-        run: yarn build:test
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.3.0
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: dist
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+      - name: install
+        run: yarn
+      - name: build
+        run: yarn build:test
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: dist
