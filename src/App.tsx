@@ -1,32 +1,104 @@
-import React, { Fragment, useState } from 'react'
+import axios from 'axios'
+import React, { ChangeEvent, Fragment, useState, useEffect } from 'react'
 
-type EventHandle = {}
+const App = () => {
+  const [notes, setNotes] = useState<Array<any>>([])
+  const [newNote, setNewNote] = useState('a new note...')
+  const [showAll, setShowAll] = useState(true)
 
-const App = (): JSX.Element => {
-  let [counter, setCounter] = useState(0)
-  const increaseByOne = () => setCounter((counter += 1))
-  const setZero = () => setCounter(0)
+  useEffect(() => {
+    console.log('effect')
+    axios.get('http://localhost:3001/notes').then((response) => {
+      console.log('response :>> ', response)
+      setNotes(response.data)
+    })
+  }, [])
+  console.log('rander', notes.length, 'notes')
+
+  const addNote = (event: React.FormEvent) => {
+    event.preventDefault()
+    const noteObject = {
+      content: newNote,
+      date: new Date().toISOString(),
+      important: Math.random() < 0.5,
+    }
+    axios.post('http://localhost:3001/notes', noteObject).then((response) => {
+      setNotes(notes.concat(response.data))
+      setNewNote('')
+    })
+  }
+  const notesToShow = showAll
+    ? notes
+    : notes.filter(
+        ({ important }: { important: Boolean }) => important === true
+      )
+
+  const handleNoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewNote(event.target.value)
+  }
+
+  const toggleImportanceOf = (id: number) => {
+    const url = `http://localhost:3001/notes/${id}`
+    const note = notes.find((n) => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+
+    axios.put(url, changedNote).then((response) => {
+      setNotes(notes.map((note) => (note.id !== id ? note : response.data)))
+    })
+  }
   return (
     <div>
-      <Display counter={counter} />
-      <Button onclick={increaseByOne} text="plus" />
-      <Button onclick={setZero} text="zero" />
+      <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
+      <ul>
+        {notesToShow.map(
+          ({
+            id,
+            content,
+            important,
+          }: {
+            id: number
+            content: string
+            important: boolean
+          }) => (
+            <Note
+              key={id}
+              content={content}
+              important={important}
+              toggleImportance={() => toggleImportanceOf(id)}
+            />
+          )
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+        <input value={newNote} onChange={handleNoteChange} />
+        <button type="submit">save</button>
+      </form>
     </div>
   )
 }
 
-const Display = ({ counter }: { counter: number }): JSX.Element => (
-  <div>{counter}</div>
-)
-
-const Button = ({
-  onclick,
-  text,
+const Note = ({
+  content,
+  important,
+  toggleImportance,
 }: {
-  onclick: React.MouseEventHandler
-  text: string
-}): JSX.Element => {
-  return <button onClick={onclick}>{text}</button>
+  content: string
+  important: boolean
+  toggleImportance: any
+}) => {
+  const label = important ? 'make not important' : 'make important'
+
+  return (
+    <li>
+      {content}
+      <button onClick={toggleImportance}>{label}</button>
+    </li>
+  )
 }
 
 export default App
